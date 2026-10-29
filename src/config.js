@@ -5,7 +5,7 @@ export const SITE={
   phone:'+917053320627',
   linkedin:'https://linkedin.com/in/bharatbassi',
   github:'', // TODO: not in the résumé. Add your GitHub URL.
-  portrait:'/portrait.jpg', // TODO: drop your own photo at public/portrait.jpg
+  portrait:import.meta.env.BASE_URL+'portrait.jpg', // TODO: drop your own photo at public/portrait.jpg
 };
 export const PROJECTS=[
  {title:'DAZN Global Sentiment Dashboard',big:'10+',unit:'markets',tools:'Power BI',color:'var(--yellow)',
