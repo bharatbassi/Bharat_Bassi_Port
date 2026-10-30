@@ -1,35 +1,31 @@
 import {useEffect,useRef,useState} from 'react';
-import {AnimatePresence,motion,useMotionValue,useReducedMotion,useSpring} from 'framer-motion';
+import {AnimatePresence,motion,useMotionValue,useSpring} from 'framer-motion';
 import gsap from 'gsap';import {ScrollTrigger} from 'gsap/ScrollTrigger';import {useGSAP} from '@gsap/react';
 import {SITE} from './config.js';
 gsap.registerPlugin(ScrollTrigger,useGSAP);
 const PIVOT='348 364';
 const STRINGS=['M346 366 C380 340 450 330 560 197','M350 369 C420 360 520 280 620 199','M352 371 C450 380 600 300 690 199','M349 372 C470 410 680 330 760 199','M347 370 C440 440 760 400 830 197'];
-export default function Collaborate(){
+export default function Collaborate({live=true}){
   const root=useRef(),btn=useRef(),panel=useRef(),closeBtn=useRef();
   const [open,setOpen]=useState(false);
-  const calm=useReducedMotion();
+  const calm=!live;
   const rx=useSpring(useMotionValue(0),{stiffness:200,damping:18}),ry=useSpring(useMotionValue(0),{stiffness:200,damping:18});
 
   useGSAP(()=>{
-    const mm=gsap.matchMedia(),sc=root.current;
-    const strs=gsap.utils.toArray('.str',sc);
-    strs.forEach(s=>{const l=s.getTotalLength();gsap.set(s,{strokeDasharray:l,strokeDashoffset:l})});
-    mm.add('(prefers-reduced-motion: reduce)',()=>{gsap.set(strs,{strokeDashoffset:0})});
-    mm.add('(prefers-reduced-motion: no-preference)',()=>{
-      const tl=gsap.timeline({scrollTrigger:{trigger:sc,start:'top 65%',once:true}});
-      tl.from('.cta-wrap',{y:50,opacity:0,duration:1,ease:'power3.out'})
-        .from('.hand',{x:-60,opacity:0,duration:1.1,ease:'power3.out'},'<.15')
-        .to(strs,{strokeDashoffset:0,duration:1.6,stagger:.12,ease:'power2.out'},'<.3');
-      // idle loops stay paused until the section is on screen
-      const loops=[gsap.to('.pull',{x:-5,y:3,duration:2.2,ease:'sine.inOut',repeat:-1,yoyo:true,paused:true}),
-        ...strs.map((s,i)=>gsap.to(s,{rotation:(i%2?1:-1)*(.5+i*.15),svgOrigin:PIVOT,duration:2.6+i*.4,ease:'sine.inOut',repeat:-1,yoyo:true,paused:true}))];
-      const st=ScrollTrigger.create({trigger:sc,onToggle:s=>loops.forEach(t=>s.isActive?t.play():t.pause())});
-      const mv=e=>{const b=sc.getBoundingClientRect();gsap.to('.react',{rotation:((e.clientX-b.left)/b.width-.5)*3,svgOrigin:PIVOT,duration:.9,ease:'power3.out',overwrite:true})};
-      sc.addEventListener('pointermove',mv);
-      return()=>{sc.removeEventListener('pointermove',mv);st.kill();loops.forEach(t=>t.kill())};
-    });
-  },{scope:root});
+    const sc=root.current,strs=gsap.utils.toArray('.str',sc);
+    strs.forEach(s=>{const l=s.getTotalLength();gsap.set(s,{strokeDasharray:l,strokeDashoffset:live?l:0})});
+    if(!live)return;
+    const tl=gsap.timeline({scrollTrigger:{trigger:sc,start:'top 70%',once:true}});
+    tl.fromTo('.cta-wrap',{y:50,opacity:0},{y:0,opacity:1,duration:1,ease:'power3.out'})
+      .from('.hand',{x:90,opacity:0,duration:1.1,ease:'power3.out'},'<.15')
+      .to(strs,{strokeDashoffset:0,duration:1.6,stagger:.12,ease:'power2.out'},'<.3');
+    const loops=[gsap.to('.pull',{x:-5,y:3,duration:2.2,ease:'sine.inOut',repeat:-1,yoyo:true,paused:true}),
+      ...strs.map((s,i)=>gsap.to(s,{rotation:(i%2?1:-1)*(.5+i*.15),svgOrigin:PIVOT,duration:2.6+i*.4,ease:'sine.inOut',repeat:-1,yoyo:true,paused:true}))];
+    const st=ScrollTrigger.create({trigger:sc,onToggle:s=>loops.forEach(t=>s.isActive?t.play():t.pause())});
+    const mv=e=>{const b=sc.getBoundingClientRect();gsap.to('.react',{rotation:((e.clientX-b.left)/b.width-.5)*3,svgOrigin:PIVOT,duration:.9,ease:'power3.out',overwrite:true})};
+    sc.addEventListener('pointermove',mv);
+    return()=>{sc.removeEventListener('pointermove',mv);st.kill();loops.forEach(t=>t.kill())};
+  },{scope:root,dependencies:[live],revertOnUpdate:true});
 
   useEffect(()=>{ // dialog: focus, Escape, Tab trap, scroll lock, restore focus
     if(!open)return;

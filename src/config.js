@@ -1,4 +1,4 @@
-import portrait from './assets/portrait.jpg';
+import portrait from './assets/portrait.webp';
 // Everything here comes from the résumé. Empty strings are placeholders to fill in.
 export const SITE={
   name:'Bharat Bassi',
@@ -6,7 +6,7 @@ export const SITE={
   phone:'+917053320627',
   linkedin:'https://linkedin.com/in/bharatbassi',
   github:'', // TODO: not in the résumé. Add your GitHub URL.
-  portrait, // TODO: drop your own photo at public/portrait.jpg
+  portrait, // TODO: drop your own photo at public/portrait.webp
 };
 export const PROJECTS=[
  {title:'DAZN Global Sentiment Dashboard',big:'10+',unit:'markets',tools:'Power BI',color:'var(--yellow)',

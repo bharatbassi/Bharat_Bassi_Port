@@ -3,11 +3,11 @@ const weak=()=>{const n=navigator;return (n.hardwareConcurrency&&n.hardwareConcu
 /** Torch that reveals `reveal` through a dark overlay laid above `children`.
  *  Props: radius (px), feather (0–1 falloff share), darkness (0–1), glow (0–1), disabled.
  *  Pointer moves write CSS variables inside rAF, so React never re-renders. */
-export default function Flashlight({children,reveal,radius=230,feather=.6,darkness=.6,glow=.16,disabled=false,className=''}){
+export default function Flashlight({children,reveal,radius=230,feather=.6,darkness=.6,glow=.16,disabled=false,still=false,className=''}){
   const ref=useRef();
   useEffect(()=>{
-    const el=ref.current,mq=matchMedia('(prefers-reduced-motion: reduce)');
-    const off=disabled||mq.matches||weak();
+    const el=ref.current;
+    const off=disabled||still||weak();
     el.dataset.static=off?'1':'0';
     if(off)return;
     let raf=0,tx=0,ty=0,x=0,y=0,r=el.getBoundingClientRect();
@@ -15,11 +15,11 @@ export default function Flashlight({children,reveal,radius=230,feather=.6,darkne
     const tick=()=>{x+=(tx-x)*.2;y+=(ty-y)*.2;set();raf=Math.abs(tx-x)+Math.abs(ty-y)>.5?requestAnimationFrame(tick):0};
     const go=()=>{if(!raf)raf=requestAnimationFrame(tick)};
     const move=e=>{r=el.getBoundingClientRect();tx=e.clientX-r.left;ty=e.clientY-r.top;el.dataset.touch=e.pointerType==='touch'?'1':'0';go()};
-    const size=()=>{r=el.getBoundingClientRect();tx=x=r.width*.72;ty=y=r.height*.42;set()};
+    const size=()=>{r=el.getBoundingClientRect();tx=x=r.width*.76;ty=y=r.height*.36;set()};
     size();
     el.addEventListener('pointermove',move);el.addEventListener('pointerdown',move);addEventListener('resize',size);
     return()=>{cancelAnimationFrame(raf);el.removeEventListener('pointermove',move);el.removeEventListener('pointerdown',move);removeEventListener('resize',size)};
-  },[disabled]);
+  },[disabled,still]);
   return(<div ref={ref} className={'fl '+className} data-static="0"
     style={{'--r':radius+'px','--f':feather,'--d':darkness,'--g':glow}}>
     <div className="fl-base">{children}</div>
